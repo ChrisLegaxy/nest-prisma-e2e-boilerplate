@@ -16,11 +16,18 @@ import { JwtAuthGuard } from "@/shared/guards/jwt-auth.guard";
 
 import { AuthService } from "./auth.service";
 import { LoginUserDto, RegisterUserDto } from "./dto/auth.dto";
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
 
+@ApiTags("auth")
 @Controller("auth")
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiBody({
+    type: () => RegisterUserDto,
+  })
+  @ApiResponse({ status: 201, description: "User registered successfully" })
+  @ApiResponse({ status: 400, description: "Bad request" })
   @Post("register")
   async register(
     @Body() registerDto: RegisterUserDto,
@@ -40,6 +47,12 @@ export class AuthController {
     return await response.json(auth);
   }
 
+  @ApiBody({
+    type: () => RegisterUserDto,
+  })
+  @ApiResponse({ status: 200, description: "User logged in successfully" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
+  @ApiResponse({ status: 400, description: "Bad request" })
   @HttpCode(HttpStatus.OK)
   @Post("login")
   async login(@Body() loginDto: LoginUserDto, @Res() response: Response) {
@@ -57,12 +70,17 @@ export class AuthController {
     return await response.json(auth);
   }
 
+  @ApiBearerAuth("AccessToken")
+  @ApiResponse({ status: 200, description: "Get current user successfully" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   @UseGuards(JwtAuthGuard)
   @Get()
   async current(@Req() request: Request) {
     return request.user;
   }
 
+  @ApiResponse({ status: 200, description: "Refresh token successfully" })
+  @ApiResponse({ status: 401, description: "Unauthorized" })
   @Get("refresh")
   async refresh(@Req() request: Request) {
     const token = request.cookies?.refresh_token;
@@ -72,6 +90,7 @@ export class AuthController {
     return await this.authService.refresh(token);
   }
 
+  @ApiResponse({ status: 200, description: "Logout successfully" })
   @Get("logout")
   async logout(@Res() response: Response) {
     response.clearCookie("refresh_token", {

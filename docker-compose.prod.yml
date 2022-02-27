@@ -20,3 +20,10 @@ services:
       POSTGRES_DB: ${DATABASE_NAME}
     ports:
       - 5432:5432
+
+  redocly:
+    image: redocly/redoc
+    environment:
+      SPEC_URL: ${REDOCLY_SPEC_URL}
+    ports:
+      - 5050:80
