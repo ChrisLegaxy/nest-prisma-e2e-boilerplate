@@ -11,9 +11,8 @@ COPY --chown=node:node prisma ./
 USER node
 
 RUN yarn --prod \
-    && yarn cache clean --force
-
-RUN yarn prisma:generate
+    && yarn cache clean --force \
+    && yarn prisma:generate
 
 ENV PATH /opt/node/app/node_modules/.bin:$PATH
 
