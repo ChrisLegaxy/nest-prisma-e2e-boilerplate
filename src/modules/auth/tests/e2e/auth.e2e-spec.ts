@@ -5,16 +5,16 @@ import { INestApplication, ValidationPipe } from "@nestjs/common";
 
 import { AppModule } from "@/app.module";
 import { PrismaService } from "@/shared/modules/prisma/prisma.service";
-import { UserService } from "@/modules/user/user.service";
-import auth from "@/tests/auth";
 
 import { AuthService } from "../../auth.service";
+import { User } from "@prisma/client";
+
+import "@/tests/handlers/register-user.handler";
 
 describe("AuthModule E2E", () => {
   let app: INestApplication;
   let prismaService: PrismaService;
   let authService: AuthService;
-  let userService: UserService;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -24,7 +24,6 @@ describe("AuthModule E2E", () => {
     app = moduleRef.createNestApplication();
     prismaService = app.get(PrismaService);
     authService = app.get(AuthService);
-    userService = app.get(UserService);
 
     app.useGlobalPipes(new ValidationPipe());
 
@@ -108,20 +107,16 @@ describe("AuthModule E2E", () => {
     });
 
     it("Should return user", async () => {
-      const { user, accessToken } = await auth(userService, authService);
+      const user: User = await pactum.spec("RegisterUser").toss();
 
       return pactum
         .spec()
         .get("/auth")
         .withHeaders({
-          authorization: `Bearer ${accessToken}`,
+          authorization: "Bearer $S{AccessToken}",
         })
         .expectStatus(200)
-        .expectJsonLike({
-          id: user.id,
-          name: user.name,
-          email: user.email,
-        });
+        .expectJsonLike(user);
     });
   });
 });

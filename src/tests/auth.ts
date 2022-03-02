@@ -1,3 +1,6 @@
+/**
+ * ? Not deprecated, but trying to use pactum handler instead [register-user.handler.ts]
+ */
 import { AuthService } from "@/modules/auth/auth.service";
 import { UserService } from "@/modules/user/user.service";
 
